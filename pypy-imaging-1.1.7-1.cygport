@@ -1,0 +1,36 @@
+ORIG_PN="Imaging"
+inherit distutils
+
+CATEGORY="Python"
+SUMMARY="Python Imaging Library for PyPy"
+DESCRIPTION="The Python Imaging Library (PIL) adds image processing
+capabilities to your Python interpreter. This library supports many
+file formats, and provides powerful image processing and graphics
+capabilities."
+HOMEPAGE="http://www.pythonware.com/products/pil/"
+SRC_URI="http://effbot.org/downloads/${ORIG_PN}-${PV}.tar.gz"
+
+PATCH_URI="
+	mirror://portage/dev-python/imaging/files/imaging-1.1.7-giftrans.patch
+	mirror://portage/dev-python/imaging/files/imaging-1.1.7-no-xv.patch
+"
+
+# spaces in CFLAGS messes up distutils
+CFLAGS=-O2
+RESTRICT="debuginfo"
+
+src_test() {
+	cd ${B}
+	PYTHONPATH="${B}/build/lib.cygwin-$(uname -r | sed -e 's|(.*||')-$(uname -m)-${PYPY_VERSION}" \
+	${PYPY} selftest.py
+}
+
+src_install() {
+	cd ${B}
+	distutils_install
+
+	# required by sketch
+	insinto ${PYPY_INCLUDEDIR}
+	doins libImaging/Imaging.h
+	doins libImaging/ImPlatform.h
+}
